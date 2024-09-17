@@ -10,12 +10,12 @@ export class AuthController {
 
 //SignUp
 
-@Post('signup') //auth/signup
+@Post('signup') // /auth/signup
 async signUp(@Body() signupData: SignupDTO){
   return this.authService.signUp(signupData);
 }
 
-@Get('login')
+@Get('login')// /auth/login
 async login(@Body() loginData: LoginDTO){
   return this.authService.signIn(loginData);
 }
