@@ -1,13 +1,33 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
+import config from './config/config';
+import { Mongoose } from 'mongoose';
 import { MongooseModule } from '@nestjs/mongoose';
-import { LoginUserModule } from './login-user/login-user.module';
-import { LoginUserModule } from './login-user/login-user.module';
 
 @Module({
-  imports: [MongooseModule.forRoot('mongodb://127.0.0.1:27017/nestJsAuth'),AuthModule, LoginUserModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, cache: true, load: [config] }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('jwt.secret'),
+      }),
+      inject: [ConfigService],
+      global: true,
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get('database.connectionString'),
+      }),
+      inject: [ConfigService],
+    }),
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
