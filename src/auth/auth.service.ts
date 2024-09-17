@@ -35,6 +35,8 @@ export class AuthService {
       email,
       password: hashedPassword,
     });
+
+    return 'User Created';
   }
 
   async signIn(loginDto: LoginDTO) {
@@ -54,7 +56,9 @@ export class AuthService {
     if (!isPasswordMatch) {
       throw new BadRequestException('Invalid Password');
     }
-    return this.generateUserTokens(findUser._id);
+    const accessTo= this.generateUserTokens(findUser._id);
+
+    return accessTo;
   }
 
   async updatePassword(updatePassDto: PasswordDTO) {
@@ -76,21 +80,24 @@ export class AuthService {
 
   async generateUserTokens(userId) {
     const accessToken = this.jwtService.sign({ userId }, { expiresIn: '1d' });
-    const refreshToken = uuidv4();
-    await this.storeRefreshToken(refreshToken, userId);
-
+    // const refreshToken = uuidv4();
+    // await this.storeRefreshToken(refreshToken, userId);
+    // await this.storeRefreshToken(userId);
     return {
-      accessToken,
-      refreshToken
-    };
+      accessToken 
+      };
+
+    // return {
+    //   accessToken,
+    //   refreshToken
+    // };
   }
 
-  async storeRefreshToken (token:string, userId){
+  async storeRefreshToken (userId){
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 3);
 
     await this.RefreshTokenNodel.create({
-      token,
       userId,
       expiryDate
     });
@@ -106,5 +113,14 @@ export class AuthService {
     }
 
     return this.generateUserTokens(token.userId);
+  }
+
+  async getAllUser(){
+    return this.UserModel.find();
+  }
+
+  async logOut(token: string) {
+    // await this.RefreshTokenNodel.delete({ token });
+    return 'Logged Out';
   }
 }
